@@ -52,6 +52,7 @@ COPY . .
 
 # Install dependencies
 RUN bundle install
+RUN assets:precompile
 
 # Add entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
