@@ -1,1 +1,32 @@
-aa
+<div class="w-full max-w-screen-2xl mx-auto h-full px-4 max-md:px-3 bg-gray-900 text-white min-h-screen">
+  <h1 class="text-center text-5xl font-extrabold my-10 tracking-wider">
+    Jarvis – Seu Assistente Inteligente
+  </h1>
+
+  <section class="mx-auto container" data-controller="jarvis transcript"
+           data-jarvis-api-endpoint-value="/jarvis/create_openai_realtime_session"
+           data-jarvis-greeting-audio-url-value="<%= audio_url 'greeting_message.mp3' %>"
+           data-jarvis-farewell-audio-url-value="<%= audio_url 'farewell_message.mp3' %>">
+    <!-- Conversation area -->
+
+    <div class="w-full bg-gray-800 rounded-xl shadow-lg p-6">
+      <!-- Transcripts container -->
+      <div id="transcripts-container" class="relative bg-gray-700 rounded-lg p-4 overflow-hidden transition-all duration-300" data-transcript-target="container">
+        <!-- A toggle button overlay in the top-right corner -->
+        <button id="toggleTranscript" type="button" data-action="click->transcript#toggle"
+                class="absolute top-2 right-2 text-sm font-medium bg-gray-600 hover:bg-gray-500 rounded px-2 py-1 transition">
+          Expandir
+        </button>
+        <!-- Full transcript list -->
+        <div id="full-transcript" class="space-y-2 overflow-auto max-h-56 hidden" data-transcript-target="fullTranscript">
+          <!-- Transcripts will be appended here -->
+        </div>
+        <!-- Current transcript (when collapsed) -->
+        <div id="current-transcript" class="text-center text-lg" data-jarvis-target="transcript" data-transcript-target="currentTranscript">
+          <em>Aguardando comando...</em>
+        </div>
+      </div>
+      <!-- (Optional) Additional controls or hints can go here -->
+    </div>
+  </section>
+</div>

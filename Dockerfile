@@ -2,7 +2,7 @@
 FROM ruby:3.2
 
 # Install dependencies (build-essential for building gems with native extensions, PostgreSQL client, and Node.js)
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev nodejs npm
 
 # Set an environment variable to store where our code will live inside the image.
 WORKDIR /app
@@ -12,6 +12,7 @@ COPY Gemfile Gemfile.lock ./
 
 # Install gems.
 RUN bundle install
+RUN rails assets:precompile
 
 # Copy the rest of the application code.
 COPY . .
