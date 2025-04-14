@@ -4,9 +4,7 @@ import { FetchRequest } from "@rails/request.js";
 export default class extends Controller {
   static targets = ["transcript"];
   static values = {
-    apiEndpoint: String,          // Exemplo: "/jarvis_sessions/create_openai_realtime_session"
-    greetingAudioUrl: String,
-    farewellAudioUrl: String
+    apiEndpoint: String
   };
 
   connect() {
@@ -112,17 +110,14 @@ export default class extends Controller {
       if (msg.type === "response.output_item.done") {
         const text = msg.item?.content?.[0]?.transcript || "";
         console.log("Recebido da IA:", text);
-        // Update the transcript element:
-        this.transcriptTarget.textContent += "\nJarvis: " + text;
-        // Optional: Also update the transcript controller
+        this.transcriptTarget.textContent = "Jarvis: " + text;
         const transcriptCtrl = this.application.getControllerForElementAndIdentifier(
-          document.getElementById("transcripts-container"),
+          this.element,
           "transcript"
         );
         if (transcriptCtrl) {
           transcriptCtrl.addTranscriptLine("Jarvis: " + text);
         }
-        // For this setup, we do not run _speakMessage because we’re using only the remote audio.
       }
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
