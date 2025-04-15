@@ -1,15 +1,14 @@
-import { Controller } from "@hotwired/stimulus";
-import { FetchRequest } from "@rails/request.js";
+import {Controller} from "@hotwired/stimulus";
+import {FetchRequest} from "@rails/request.js";
 
 export default class extends Controller {
-  static targets = ["transcript"];
+  static targets = ["transcript", "captions", "audioDisplay"];
   static values = {
     apiEndpoint: String
   };
 
   connect() {
     this.transcriptTarget.textContent = "Conectando com Jarvis...";
-    this.started = false;
     this._startSession();
   }
 
@@ -94,13 +93,10 @@ export default class extends Controller {
         response: { modalities: ["audio", "text"] }
       };
       this.dataChannel.send(JSON.stringify(introMsg));
-
-      // Atualiza a interface para indicar que Jarvis está online
-      this.started = true;
       this.transcriptTarget.textContent = "Jarvis está online. Fale normalmente.";
     } catch (error) {
       console.error("Erro em _startSession:", error);
-      this.transcriptTarget.textContent = "Erro ao iniciar sessão com Jarvis.";
+      this.transcriptTarget.textContent = error == "NotAllowedError: Permission denied" ? "Erro: Permissão de microfone negada." : "Erro ao iniciar sessão com Jarvis.";
     }
   }
 
@@ -111,6 +107,7 @@ export default class extends Controller {
         const text = msg.item?.content?.[0]?.transcript || "";
         console.log("Recebido da IA:", text);
         this.transcriptTarget.textContent = "Jarvis: " + text;
+        this._animateWave();
         const transcriptCtrl = this.application.getControllerForElementAndIdentifier(
           this.element,
           "transcript"
@@ -124,11 +121,18 @@ export default class extends Controller {
     }
   }
 
-
-  _speakMessage(message) {
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = "pt-BR";
-    window.speechSynthesis.speak(utterance);
+  _animateWave() {
+    const bars = this.audioDisplayTarget.querySelectorAll(".bar");
+    if (!bars.length) return;
+    bars.forEach((bar) => {
+      const scale = Math.random() * 2 + 1; // scale between 1 and 3
+      bar.style.transform = `scaleY(${scale})`;
+    });
+    setTimeout(() => {
+      bars.forEach((bar) => {
+        bar.style.transform = "scaleY(1)";
+      });
+    }, 300);
   }
 
   disconnect() {

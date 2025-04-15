@@ -12,6 +12,7 @@ COPY Gemfile Gemfile.lock ./
 
 # Install gems.
 RUN bundle install
+RUN rails assets:clobber
 RUN rails assets:precompile
 
 # Copy the rest of the application code.

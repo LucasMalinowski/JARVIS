@@ -13,7 +13,7 @@ export default class extends Controller {
     this.currentTranscriptTarget.classList.toggle("hidden", this.expanded);
     // Update the toggle button text
     const btn = this.element.querySelector("#toggleTranscript");
-    btn.textContent = this.expanded ? "Fechar" : "Expandir";
+    btn.classList.toggle("fa-fade")
   }
 
   // Optional helper: If you want to add a new transcript line:
