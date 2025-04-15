@@ -4,7 +4,9 @@ import {FetchRequest} from "@rails/request.js";
 export default class extends Controller {
   static targets = ["transcript", "captions", "audioDisplay"];
   static values = {
-    apiEndpoint: String
+    apiEndpoint: String,
+    isAiTalking: { type: Boolean, default: false },
+    aiTalkingIntervalId: { type: String, default: null }
   };
 
   connect() {
@@ -104,10 +106,10 @@ export default class extends Controller {
     try {
       const msg = JSON.parse(evt.data);
       if (msg.type === "response.output_item.done") {
+        this.isAiTalkingValue = true;
         const text = msg.item?.content?.[0]?.transcript || "";
         console.log("Recebido da IA:", text);
         this.transcriptTarget.textContent = "Jarvis: " + text;
-        this._animateWave();
         const transcriptCtrl = this.application.getControllerForElementAndIdentifier(
           this.element,
           "transcript"
@@ -115,6 +117,10 @@ export default class extends Controller {
         if (transcriptCtrl) {
           transcriptCtrl.addTranscriptLine("Jarvis: " + text);
         }
+      }
+
+      if (msg.type === "output_audio_buffer.stopped") {
+        this.isAiTalkingValue = false;
       }
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
@@ -135,15 +141,24 @@ export default class extends Controller {
     }, 300);
   }
 
-  disconnect() {
-    console.log("Desconectando Jarvis...");
-    if (this.pc) {
-      this.pc.close();
-      this.pc = null;
-    }
-    if (this.audioStream) {
-      this.audioStream.getTracks().forEach(track => track.stop());
-      this.audioStream = null;
+  isAiTalkingValueChanged(value) {
+    const bars = document.querySelectorAll("[data-jarvis-target='audioDisplay'] .bar");
+    if (value) {
+      this.aiTalkingIntervalIdValue = setInterval(() => {
+        bars.forEach((bar) => {
+          bar.classList.remove("!h-1")
+          const scale = Math.random() * (5 - 1) + 1;
+          bar.style.transformOrigin = "center center";
+          bar.style.transform = `scaleY(${scale})`;
+        });
+      }, 100);
+    } else {
+      clearInterval(this.aiTalkingIntervalIdValue);
+      this.aiTalkingIntervalIdValue = null;
+      bars.forEach((bar) => {
+        bar.classList.add("!h-1")
+        bar.style.transform = `scaleY(1)`
+      });
     }
   }
 }
