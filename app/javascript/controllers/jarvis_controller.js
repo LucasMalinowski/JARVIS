@@ -4,9 +4,10 @@ import {FetchRequest} from "@rails/request.js";
 export default class extends Controller {
   static targets = ["transcript", "captions", "audioDisplay"];
   static values = {
-    apiEndpoint: String,
     isAiTalking: { type: Boolean, default: false },
-    aiTalkingIntervalId: { type: String, default: null }
+    aiTalkingIntervalId: { type: String, default: null },
+    weatherApiKey: String,
+    homeCoordinates: String,
   };
 
   connect() {
@@ -17,7 +18,7 @@ export default class extends Controller {
   async _startSession() {
     try {
       // Solicita a criação da sessão realtime ao backend
-      const request = new FetchRequest("post", this.apiEndpointValue, { responseKind: "json" });
+      const request = new FetchRequest("post", "/jarvis/create_openai_realtime_session", { responseKind: "json" });
       const response = await request.perform();
       if (!response.ok) {
         const errText = await response.text();
@@ -119,6 +120,33 @@ export default class extends Controller {
         }
       }
 
+      if (msg.type === "response.function_call_arguments.done") {
+        console.log(msg)
+        const name = msg.name;
+        const rawArgs = msg.arguments || "";
+        console.log("Done message received. Function name:", name, "Raw args:", rawArgs);
+
+        // If raw arguments are empty, bail
+        if (!rawArgs.trim()) return;
+
+        let parsed;
+        try {
+          parsed = JSON.parse(rawArgs);
+        } catch (err) {
+          console.error("Failed to parse done message function arguments:", err, rawArgs);
+          return;
+        }
+
+        console.log("Parsed done message:", name, parsed);
+        if (name === "create_reminder") {
+          // this._handleCreateReminder(parsed);
+        } else if (name === "get_weather") {
+          this._handleGetWeather(parsed);
+        } else {
+          console.warn("Unknown function call:", name);
+        }
+      }
+
       if (msg.type === "output_audio_buffer.stopped") {
         this.isAiTalkingValue = false;
       }
@@ -127,18 +155,50 @@ export default class extends Controller {
     }
   }
 
-  _animateWave() {
-    const bars = this.audioDisplayTarget.querySelectorAll(".bar");
-    if (!bars.length) return;
-    bars.forEach((bar) => {
-      const scale = Math.random() * 2 + 1; // scale between 1 and 3
-      bar.style.transform = `scaleY(${scale})`;
-    });
-    setTimeout(() => {
-      bars.forEach((bar) => {
-        bar.style.transform = "scaleY(1)";
+  _handleGetWeather({ forecast }) {
+    this.transcriptTarget.textContent = `Jarvis: Buscando tempo para Cascavel...`;
+
+    let weatherUrl = `http://api.weatherapi.com/v1/forecast.json?key=${this.weatherApiKeyValue}&q=${encodeURIComponent(this.homeCoordinatesValue)}&days=2&lang=pt`;
+
+    fetch(weatherUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Data returned from WeatherAPI should have a location object and a current object.
+        let dayIndex = forecast === "tomorrow" ? 1 : 0;
+        const day = data.forecast.forecastday[dayIndex].day;
+        const current = data.current;
+        const weatherResult = {
+          location: `${data.location.name}, ${data.location.region}, ${data.location.country}`,
+          avg_temp: forecast === "current" ? current.temp_c : day.avgtemp_c,
+          max_temp: day.maxtemp_c,
+          min_temp: day.mintemp_c,
+          condition: forecast === "current" ? current.condition.text : day.condition.text,
+          chance_of_rain: day.daily_chance_of_rain
+        };
+        console.log("Weather data received:", weatherResult);
+
+        let response_instruction = `Tempo em ${weatherResult.location} — ` +
+          `${weatherResult.avg_temp}°C (máx ${weatherResult.max_temp}°C, mín ${weatherResult.min_temp}°C), ` +
+          `${weatherResult.condition}, chuva: ${weatherResult.chance_of_rain}%.`;
+
+        const followUp = {
+          type: "response.create",
+          response: {
+            modalities: ["audio", "text"],
+            instructions: "Responda com o tempo atual e adicione um emoji correspondente à condição do dia *SEM FALTA*: " + response_instruction
+          }
+        };
+        this.dataChannel.send(JSON.stringify(followUp));
+      })
+      .catch(error => {
+        console.error("Error fetching weather:", error);
+        this.transcriptTarget.textContent = "Jarvis: Erro ao buscar informações do tempo.";
       });
-    }, 300);
   }
 
   isAiTalkingValueChanged(value) {

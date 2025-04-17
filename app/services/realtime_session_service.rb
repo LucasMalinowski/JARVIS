@@ -46,7 +46,26 @@ class RealtimeSessionService
         silence_duration_ms: 1000,
         create_response: true
       },
-      max_response_output_tokens: 500
+      max_response_output_tokens: 500,
+      tools: [
+        {
+          "name": "get_weather",
+          "description": "What is the weather today / What is the rain chance today? / What is the max/min temperature today?",
+          "type": "function",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "forecast": {
+                "type": "string",
+                "description": "The type of weather forecast to retrieve",
+                "enum": %w[current tomorrow]
+              }
+            },
+            "additionalProperties": false,
+            "required": %w[forecast]
+          }
+        }
+      ]
     }
   end
 

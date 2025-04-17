@@ -1,5 +1,9 @@
 <div class="w-full h-full bg-gray-900 text-white min-h-screen flex items-center justify-center">
-  <div class="max-w-xl w-full bg-white rounded-lg shadow p-6 flex flex-col gap-6" data-controller="jarvis transcript" data-jarvis-api-endpoint-value="/jarvis/create_openai_realtime_session">
+  <div class="max-w-xl w-full bg-white rounded-lg shadow p-6 flex flex-col gap-6"
+       data-controller="jarvis transcript"
+       data-jarvis-weather-api-key-value="<%= ENV["WEATHER_API_KEY"] %>"
+       data-jarvis-home-coordinates-value="<%= ENV["HOME_COORDINATES"] %>"
+  >
     <div class="flex items-center justify-center gap-2">
       <i class="fa-solid fa-brain-circuit text-black fa-2xl"></i>
       <h2 class="text-2xl font-semibold text-gray-900">J.A.R.V.I.S</h2>
