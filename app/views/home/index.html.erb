@@ -22,9 +22,11 @@
     </div>
 
     <div id="current-transcript" class="flex items-center justify-between gap-3 bg-gray-100 rounded-md p-4 text-gray-800 relative" data-jarvis-target="captions" data-transcript-target="container">
-      <div class="absolute w-0 h-0 border-l-8 border-l-transparent border-r-8 border-r-transparent border-b-8 border-b-gray-100 -top-2 left-6"></div>
       <div class="flex items-center gap-4">
         <i class="fa-solid fa-comment-captions fa-lg"></i>
+        <button type="button" data-jarvis-target="micToggle" data-action="click->jarvis#toggleMicPermission" class="ml-2 text-gray-600 hover:text-gray-800 hidden" title="Ligar/Desligar microfone">
+          <i data-jarvis-target="micIcon" class="fa-solid fa-microphone-slash fa-lg"></i>
+        </button>
         <p data-jarvis-target="transcript" data-transcript-target="currentTranscript">
           Aguardando comando...
         </p>

@@ -2,7 +2,7 @@ import {Controller} from "@hotwired/stimulus";
 import {FetchRequest} from "@rails/request.js";
 
 export default class extends Controller {
-  static targets = ["transcript", "captions", "audioDisplay"];
+  static targets = ["transcript", "captions", "audioDisplay", "micIcon", "micToggle"];
   static values = {
     isAiTalking: { type: Boolean, default: false },
     aiTalkingIntervalId: { type: String, default: null },
@@ -10,9 +10,65 @@ export default class extends Controller {
     homeCoordinates: String,
   };
 
-  connect() {
-    this.transcriptTarget.textContent = "Conectando com Jarvis...";
-    this._startSession();
+  async connect() {
+    // Initial transcript text
+    this.transcriptTarget.textContent = "Jarvis iniciando...";
+    // Track will hold the single audio track once granted
+    this.audioTrack         = null;
+
+    // Detect mobile vs desktop
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // On mobile: show the mic‑toggle, but do NOT start session yet
+      this.micToggleTarget.classList.remove("hidden");
+      this.mobileMode = true;
+    } else {
+      // On desktop: hide the mic‑toggle, request mic, then start immediately
+      this.micToggleTarget.classList.add("hidden");
+      this.mobileMode = false;
+      try {
+        this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioTrack  = this.audioStream.getTracks()[0];
+        this.audioTrack.enabled = true;
+        this.micIconTarget.classList.replace("fa-microphone-slash", "fa-microphone");
+        // Now that we have permission, start the realtime session
+        this._startSession();
+      } catch (err) {
+        console.warn("Permissão de microfone negada no desktop:", err);
+      }
+    }
+  }
+
+
+  // request or revoke mic permission
+  async toggleMicPermission(event) {
+    event.preventDefault();
+
+    // First time click: request mic permission
+    if (!this.audioTrack) {
+      try {
+        this.audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        this.audioTrack  = this.audioStream.getTracks()[0];
+        this.audioTrack.enabled = true;
+        this.micIconTarget.classList.replace("fa-microphone-slash", "fa-microphone");
+        // If on mobile, only now start the session
+        if (this.mobileMode) {
+          this._startSession();
+        }
+      } catch (err) {
+        console.warn("Permissão de microfone negada:", err);
+      }
+      return;
+    }
+
+    // Subsequent clicks: just mute/unmute the existing track
+    this.audioTrack.enabled = !this.audioTrack.enabled;
+    if (this.audioTrack.enabled) {
+      this.micIconTarget.classList.replace("fa-microphone-slash", "fa-microphone");
+    } else {
+      this.micIconTarget.classList.replace("fa-microphone", "fa-microphone-slash");
+    }
   }
 
   async _startSession() {
@@ -158,7 +214,7 @@ export default class extends Controller {
   _handleGetWeather({ forecast }) {
     this.transcriptTarget.textContent = `Jarvis: Buscando tempo para Cascavel...`;
 
-    let weatherUrl = `http://api.weatherapi.com/v1/forecast.json?key=${this.weatherApiKeyValue}&q=${encodeURIComponent(this.homeCoordinatesValue)}&days=2&lang=pt`;
+    let weatherUrl = `https://api.weatherapi.com/v1/forecast.json?key=${this.weatherApiKeyValue}&q=${encodeURIComponent(this.homeCoordinatesValue)}&days=2&lang=pt`;
 
     fetch(weatherUrl)
       .then(response => {
