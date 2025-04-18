@@ -1,5 +1,6 @@
 import {Controller} from "@hotwired/stimulus";
 import {FetchRequest} from "@rails/request.js";
+import { handleGetWeather } from "services/get_weather"
 
 export default class extends Controller {
   static targets = ["transcript", "captions", "audioDisplay", "micIcon", "micToggle"];
@@ -39,7 +40,6 @@ export default class extends Controller {
       }
     }
   }
-
 
   // request or revoke mic permission
   async toggleMicPermission(event) {
@@ -197,7 +197,7 @@ export default class extends Controller {
         if (name === "create_reminder") {
           // this._handleCreateReminder(parsed);
         } else if (name === "get_weather") {
-          this._handleGetWeather(parsed);
+          handleGetWeather.call(this, parsed);
         } else {
           console.warn("Unknown function call:", name);
         }
@@ -209,52 +209,6 @@ export default class extends Controller {
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
     }
-  }
-
-  _handleGetWeather({ forecast }) {
-    this.transcriptTarget.textContent = `Jarvis: Buscando tempo para Cascavel...`;
-
-    let weatherUrl = `https://api.weatherapi.com/v1/forecast.json?key=${this.weatherApiKeyValue}&q=${encodeURIComponent(this.homeCoordinatesValue)}&days=2&lang=pt`;
-
-    fetch(weatherUrl)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        // Data returned from WeatherAPI should have a location object and a current object.
-        let dayIndex = forecast === "tomorrow" ? 1 : 0;
-        const day = data.forecast.forecastday[dayIndex].day;
-        const current = data.current;
-        const weatherResult = {
-          location: `${data.location.name}, ${data.location.region}, ${data.location.country}`,
-          avg_temp: forecast === "current" ? current.temp_c : day.avgtemp_c,
-          max_temp: day.maxtemp_c,
-          min_temp: day.mintemp_c,
-          condition: forecast === "current" ? current.condition.text : day.condition.text,
-          chance_of_rain: day.daily_chance_of_rain
-        };
-        console.log("Weather data received:", weatherResult);
-
-        let response_instruction = `Tempo em ${weatherResult.location} — ` +
-          `${weatherResult.avg_temp}°C (máx ${weatherResult.max_temp}°C, mín ${weatherResult.min_temp}°C), ` +
-          `${weatherResult.condition}, chuva: ${weatherResult.chance_of_rain}%.`;
-
-        const followUp = {
-          type: "response.create",
-          response: {
-            modalities: ["audio", "text"],
-            instructions: "Responda com o tempo atual e adicione um emoji correspondente à condição do dia *SEM FALTA*: " + response_instruction
-          }
-        };
-        this.dataChannel.send(JSON.stringify(followUp));
-      })
-      .catch(error => {
-        console.error("Error fetching weather:", error);
-        this.transcriptTarget.textContent = "Jarvis: Erro ao buscar informações do tempo.";
-      });
   }
 
   isAiTalkingValueChanged(value) {
