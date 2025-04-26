@@ -5,12 +5,8 @@ class RealtimeSessionService
   def initialize; end
 
   def create_realtime_session
-    response = http_client.request(request)
-    unless response.is_a?(Net::HTTPSuccess)
-      Rails.logger.error("Failed to create realtime session: #{response.body}")
-      raise StandardError
-    end
-
+    response = http_client.request(build_request)
+    raise_error_unless_success(response)
     JSON.parse(response.body)
   end
 
@@ -18,17 +14,15 @@ class RealtimeSessionService
 
   def http_client
     uri = URI("https://api.openai.com/v1/realtime/sessions")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http
+    Net::HTTP.new(uri.host, uri.port).tap { |http| http.use_ssl = true }
   end
 
-  def request
-    req = Net::HTTP::Post.new("/v1/realtime/sessions")
-    req["Authorization"] = "Bearer #{Rails.application.credentials.openai[:api_key]}"
-    req["Content-Type"] = "application/json"
-    req.body = payload.to_json
-    req
+  def build_request
+    Net::HTTP::Post.new("/v1/realtime/sessions").tap do |req|
+      req["Authorization"] = "Bearer #{Rails.application.credentials.openai[:api_key]}"
+      req["Content-Type"] = "application/json"
+      req.body = payload.to_json
+    end
   end
 
   def payload
@@ -39,33 +33,19 @@ class RealtimeSessionService
       voice: "ash",
       input_audio_format: "pcm16",
       output_audio_format: "pcm16",
-      turn_detection: {
-        type: "server_vad",
-        threshold: 0.5,
-        prefix_padding_ms: 300,
-        silence_duration_ms: 1000,
-        create_response: true
-      },
+      turn_detection: turn_detection_config,
       max_response_output_tokens: 500,
-      tools: [
-        {
-          "name": "get_weather",
-          "description": "What is the weather today / What is the rain chance today? / What is the max/min temperature today?",
-          "type": "function",
-          "parameters": {
-            "type": "object",
-            "properties": {
-              "forecast": {
-                "type": "string",
-                "description": "The type of weather forecast to retrieve",
-                "enum": %w[current tomorrow]
-              }
-            },
-            "additionalProperties": false,
-            "required": %w[forecast]
-          }
-        }
-      ]
+      tools: [ get_weather_function, create_reminder_function ]
+    }
+  end
+
+  def turn_detection_config
+    {
+      type: "server_vad",
+      threshold: 0.5,
+      prefix_padding_ms: 300,
+      silence_duration_ms: 1000,
+      create_response: true
     }
   end
 
@@ -73,7 +53,7 @@ class RealtimeSessionService
     <<~PROMPT
       **Overview:**
         You are JARVIS, an advanced AI assistant modeled after Tony Stark’s personal assistant. You are designed to manage information, control systems, and interact with the user in a natural, dynamic, and engaging manner. All your responses will be spoken aloud with a clear, calm, and friendly tone.
-      
+
         **Instructions:**
         - **Voice Interface:** You have a seamless voice interface. You listen carefully to user commands and speak your responses aloud.
         - **Concise and Precise:** Keep your responses brief and to the point.
@@ -90,12 +70,50 @@ class RealtimeSessionService
         - You can access real-time data, control connected systems, and provide precise, context-aware feedback.
         - You continuously monitor for commands and seamlessly transition between processing inputs and giving audible responses.
         - You dynamically adjust the flow of conversation based on user cues, ensuring that you never interrupt the user while they speak.
-      
+
         **Additional Guidelines:**
         - Always speak clearly and at a measured pace.
         - Use a calm and confident tone, with a touch of humor when it enhances the interaction.
         - When no clear command is received (such as a brief pause), gently prompt the user to continue.
         - Maintain a secure and respectful conversation environment at all times.
     PROMPT
+  end
+
+  def get_weather_function
+    {
+      "name": "get_weather",
+      "description": "What is the weather today / What is the rain chance today? / What is the max/min temperature today?",
+      "type": "function",
+      "parameters": {
+        "type": "object",
+        "properties": { "forecast": { "type": "string", "description": "The type of weather forecast to retrieve", "enum": %w[current tomorrow] } },
+        "additionalProperties": false,
+        "required": %w[forecast]
+      }
+    }
+  end
+
+  def create_reminder_function
+    {
+      "name": "create_reminder",
+      "description": "Create a reminder for the user.",
+      "type": "function",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reminder_text": { "type": "string", "description": "The text of the reminder" },
+          "reminder_time": { "type": "string", "description": "The time for the reminder in ISO 8601 format" }
+        },
+        "additionalProperties": false,
+        "required": %w[reminder_text reminder_time]
+      }
+    }
+  end
+
+  def raise_error_unless_success(response)
+    unless response.is_a?(Net::HTTPSuccess)
+      Rails.logger.error("Erro ao criar sessão: #{response.body}")
+      raise StandardError
+    end
   end
 end
