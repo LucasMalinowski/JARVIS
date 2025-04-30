@@ -1,6 +1,7 @@
 module Api
   module V1
     class WeathersController < ApplicationController
+      include WeatherConcern
       skip_before_action :verify_authenticity_token
 
       def index
@@ -23,6 +24,12 @@ module Api
             condition: params[:forecast] == "current" ? current_weather["condition"]["text"] : day_data["condition"]["text"],
             chance_of_rain: day_data["daily_chance_of_rain"]
           }
+
+          begin
+            broadcast_weather_update(weather_data)
+          rescue => e
+            Rails.logger.error("[WeathersController] Turbo broadcast failed: #{e.message}")
+          end
 
           render json: weather_result, status: :ok
         else

@@ -1,0 +1,22 @@
+<% forecast_data.each do |forecast| %>
+  <li class="sm:w-1/2 w-full bg-white rounded-lg shadow p-2 flex flex-col items-center text-center">
+    <span class="text-xs sm:text-normal  uppercase text-gray-500">
+      <%= Date.parse(forecast[:date]).strftime("%d/%m") %>
+    </span>
+
+    <%= image_tag forecast[:condition_icon], alt: forecast[:condition],
+                  class: "w-8 h-8" %>
+
+    <span class="text-sm font-medium text-gray-700">
+      <%= forecast[:condition] %>
+    </span>
+
+    <span class="mt-1 text-xs sm:text-normal font-bold text-gray-900">
+      <%= forecast[:max_temp] %>° / <span class="font-normal text-gray-500"><%= forecast[:min_temp] %>°</span>
+    </span>
+
+    <span class="mt-1 text-xs sm:text-normal text-blue-500">
+      Chuva: <%= forecast[:rain_chance] %>%
+    </span>
+  </li>
+<% end %>

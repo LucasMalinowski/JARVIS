@@ -15,6 +15,8 @@ export default class extends Controller {
     // Track will hold the single audio track once granted
     this.audioTrack         = null;
 
+    handleGetWeather.call(this, {forecast: "current"}, false);
+
     // Detect mobile vs desktop
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 

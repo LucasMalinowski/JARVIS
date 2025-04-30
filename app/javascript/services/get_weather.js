@@ -2,7 +2,7 @@
  * @param {Object} opts  { forecast }
  * @this {import("@hotwired/stimulus").Controller}  bound to your Jarvis controller
  */
-export async function handleGetWeather(opts) {
+export async function handleGetWeather(opts, shouldSpeak = true) {
   this.transcriptTarget.textContent = `Jarvis: Buscando tempo para Cascavel...`;
 
   try {
@@ -31,16 +31,18 @@ export async function handleGetWeather(opts) {
       `${avg_temp}°C (máx ${max_temp}°C, mín ${min_temp}°C), ` +
       `${condition}, chuva: ${chance_of_rain}%.`;
 
-    const followUp = {
-      type: "response.create",
-      response: {
-        modalities: ["audio", "text"],
-        instructions:
-          "Responda com o tempo atual e adicione um emoji correspondente à condição do dia *SEM FALTA*: " +
-          response_instruction
-      }
-    };
-    this.dataChannel.send(JSON.stringify(followUp));
+    if (shouldSpeak){
+      const followUp = {
+        type: "response.create",
+        response: {
+          modalities: ["audio", "text"],
+          instructions:
+            "Responda com o tempo atual e adicione um emoji correspondente à condição do dia *SEM FALTA*: " +
+            response_instruction
+        }
+      };
+      this.dataChannel.send(JSON.stringify(followUp));
+    }
   } catch (err) {
     console.error("Error fetching weather from Rails:", err);
     this.transcriptTarget.textContent =
