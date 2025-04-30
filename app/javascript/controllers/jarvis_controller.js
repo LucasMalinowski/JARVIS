@@ -6,9 +6,7 @@ export default class extends Controller {
   static targets = ["transcript", "captions", "audioDisplay", "micIcon", "micToggle"];
   static values = {
     isAiTalking: { type: Boolean, default: false },
-    aiTalkingIntervalId: { type: String, default: null },
-    weatherApiKey: String,
-    homeCoordinates: String,
+    aiTalkingIntervalId: { type: String, default: null }
   };
 
   async connect() {

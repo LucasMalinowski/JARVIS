@@ -1,19 +1,33 @@
 <div class="relative w-full h-full bg-gray-900 text-white min-h-screen flex items-center justify-center">
-  <div class="absolute top-2 left-2 bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg p-3 w-32 sm:w-36">
-    <h3 class="text-[10px] sm:text-xs font-medium text-teal-400 uppercase">Último Comando</h3>
-    <p class="mt-1 text-[12px] sm:text-sm text-white">— nenhum —</p>
+  <div class="absolute top-2 left-2 bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg p-3 w-32 sm:w-48">
+    <h3 class="text-[10px] sm:text-xs font-medium text-teal-400 uppercase">Previsão do Tempo</h3>
+    <div class="mt-1 text-[12px] sm:text-sm text-white">
+      <ul id="weather">
+        <li class="bg-white rounded text-black p-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-sun fa-lg"></i>
+            <span>Carregando...</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <div class="absolute top-2 right-2 bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg p-3 w-32 sm:w-36">
-    <h3 class="text-[10px] sm:text-xs font-medium text-teal-400 uppercase">Status Sistema</h3>
-    <p class="mt-1 text-[12px] sm:text-sm text-white">Online</p>
+  <div class="absolute top-2 right-2 bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg p-3 w-32 sm:w-48">
+    <h3 class="text-[10px] sm:text-xs font-medium text-teal-400 uppercase">Lembretes</h3>
+    <div class="mt-1 text-[12px] sm:text-sm text-white">
+      <ul id="reminders">
+        <li class="bg-white rounded text-black p-2">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-bell fa-lg"></i>
+            <span>Carregando...</span>
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 
-  <div class="max-w-xl w-full bg-white rounded-lg shadow p-6 flex flex-col gap-6"
-       data-controller="jarvis transcript"
-       data-jarvis-weather-api-key-value="<%= ENV["WEATHER_API_KEY"] %>"
-       data-jarvis-home-coordinates-value="<%= ENV["HOME_COORDINATES"] %>"
-  >
+  <div class="max-w-xl w-full bg-white rounded-lg shadow p-6 flex flex-col gap-6" data-controller="jarvis transcript">
     <div class="flex items-center justify-center gap-2">
       <i class="fa-solid fa-brain-circuit text-black fa-2xl"></i>
       <h2 class="text-2xl font-semibold text-gray-900">J.A.R.V.I.S</h2>
