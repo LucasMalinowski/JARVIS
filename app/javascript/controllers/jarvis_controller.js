@@ -195,7 +195,7 @@ export default class extends Controller {
 
         console.log("Parsed done message:", name, parsed);
         if (name === "create_reminder") {
-          // this._handleCreateReminder(parsed);
+          handleCreateReminder.call(this,parsed);
         } else if (name === "get_weather") {
           handleGetWeather.call(this, parsed);
         } else {
