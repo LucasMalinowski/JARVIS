@@ -30,7 +30,7 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
-gem "inline_svg", "~> 1.9.0"
+gem "inline_svg", "~> 1.10.0"
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
