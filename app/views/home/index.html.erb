@@ -29,6 +29,16 @@
     <div class="flex items-center justify-center gap-2">
       <i class="fa-solid fa-brain-circuit text-black fa-2xl"></i>
       <h2 class="text-2xl font-semibold text-gray-900">J.A.R.V.I.S</h2>
+
+      <button
+        data-jarvis-target="muteButton"
+        data-action="click->jarvis#toggleAudio"
+        class="w-6 h-6 text-black hover:opacity-70 transition"
+        aria-label="Toggle audio"
+      >
+        <%= inline_svg_tag "icons/unmute.svg", class: "w-6 h-6", data: { jarvis_target: "unmuteIcon" } %>
+        <%= inline_svg_tag "icons/mute.svg", class: "w-6 h-6 hidden", data: { jarvis_target: "muteIcon" } %>
+      </button>
     </div>
 
     <div class="flex gap-2 justify-center ml-2 my-6" data-jarvis-target="audioDisplay">
@@ -44,6 +54,7 @@
     </div>
 
     <div id="current-transcript" class="flex items-center justify-between gap-3 bg-gray-100 rounded-md p-4 text-gray-800 relative" data-jarvis-target="captions" data-transcript-target="container">
+      <audio data-jarvis-target="audio" autoplay controls class="hidden"></audio>
       <div class="flex items-center gap-4">
         <i class="fa-solid fa-comment-captions fa-lg"></i>
         <button type="button" data-jarvis-target="micToggle" data-action="click->jarvis#toggleMicPermission" class="ml-2 text-gray-600 hover:text-gray-800 hidden" title="Ligar/Desligar microfone">

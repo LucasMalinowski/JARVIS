@@ -3,10 +3,14 @@ import {FetchRequest} from "@rails/request.js";
 import { handleGetWeather } from "services/get_weather"
 
 export default class extends Controller {
-  static targets = ["transcript", "captions", "audioDisplay", "micIcon", "micToggle"];
+  static targets = [
+    "transcript", "captions", "audioDisplay",
+    "micIcon", "micToggle", "audio", "muteIcon", "unmuteIcon"
+  ];
   static values = {
     isAiTalking: { type: Boolean, default: false },
-    aiTalkingIntervalId: { type: String, default: null }
+    aiTalkingIntervalId: { type: String, default: null },
+    audioEnabled: { type: Boolean, default: true }
   };
 
   async connect() {
@@ -94,12 +98,9 @@ export default class extends Controller {
         console.log("Recebido track remoto:", event);
         if (event.streams && event.streams[0]) {
           this.remoteAudioStream = event.streams[0];
-          // Opcional: se quiser reproduzir o áudio remoto, crie um elemento <audio>
-          if (!this.audioElement) {
-            this.audioElement = document.createElement("audio");
-            this.audioElement.autoplay = true;
-            this.audioElement.srcObject = this.remoteAudioStream;
-            this.element.appendChild(this.audioElement);
+          if (this.hasAudioTarget) {
+            this.audioTarget.srcObject = this.remoteAudioStream;
+            this.audioTarget.muted = !this.audioEnabledValue;
           }
         }
       };
@@ -158,6 +159,25 @@ export default class extends Controller {
       this.transcriptTarget.textContent = error == "NotAllowedError: Permission denied" ? "Erro: Permissão de microfone negada." : "Erro ao iniciar sessão com Jarvis.";
     }
   }
+
+  toggleAudio() {
+    this.audioEnabledValue = !this.audioEnabledValue;
+
+    if (this.hasAudioTarget) {
+      this.audioTarget.muted = !this.audioEnabledValue;
+    }
+
+    if (this.hasAudioDisplayTarget) {
+      this.audioDisplayTarget.classList.toggle("hidden", !this.audioEnabledValue);
+    }
+
+    if (this.hasMuteIconTarget) {
+      this.muteIconTarget.classList.toggle("hidden", this.audioEnabledValue);
+      this.unmuteIconTarget.classList.toggle("hidden", !this.audioEnabledValue);
+    }
+  }
+
+
 
   _handleDataChannelMessage(evt) {
     try {
