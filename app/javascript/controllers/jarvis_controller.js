@@ -39,6 +39,7 @@ export default class extends Controller {
         this.micIconTarget.classList.replace("fa-microphone-slash", "fa-microphone");
         // Now that we have permission, start the realtime session
         this._startSession();
+        this.toggleAudio()
       } catch (err) {
         console.warn("Permissão de microfone negada no desktop:", err);
       }

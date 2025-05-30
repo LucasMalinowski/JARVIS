@@ -11,9 +11,14 @@ services:
     build: .
     command: bin/dev
     volumes:
-      - .:/app
+      - .:/app:cached
+      - node_modules:/app/node_modules
+
     ports:
       - "3000:3000"
     depends_on:
       - db
     tty: true
+
+volumes:
+  node_modules:

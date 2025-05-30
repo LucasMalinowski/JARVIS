@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/stimulus-webpack-helpers": "^1.0.1",
+    "@hotwired/turbo-rails": "^8.0.13",
     "@rails/request.js": "^0.0.11"
   }
 }
