@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  devise_for :users
   get "home/index"
   root "home#index"
   post "/jarvis/create_openai_realtime_session", to: "jarvis#create_openai_realtime_session"

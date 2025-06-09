@@ -1,0 +1,38 @@
+<div class="flex w-full h-full align-center justify-center items-center relative p-5 bg-gray-700 overflow-hidden">
+  <div class="absolute bg-[#02FEFF] w-[300px] h-[300px] rotate-45 top-[-150px] left-[-150px]"></div>
+  <div class="absolute bg-[#02FEFF] w-[400px] h-[400px] rounded-full bottom-[-200px] right-[-200px]"></div>
+  
+  <div class="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-md z-10 max-h-[600px]">
+    <h2 class="mb-6 text-teal-950 text-4xl font-bold text-center uppercase">Sign up</h2>
+
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+      <%= render "devise/shared/error_messages", resource: resource %>
+
+      <div class="mb-6">
+        <%= f.label :email, "Email", class: "block text-green-950 mb-2 text-base font-medium" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Email", class: "w-full p-5 border-2 border-gray-200 bg-white text-teal-950 rounded-md text-large" %>
+      </div>
+
+      <div class="mb-6">
+        <%= f.label :password, class: "block text-green-950 mb-2 text-base font-medium"  %>
+        <% if @minimum_password_length %>
+          <em>(<%= @minimum_password_length %> characters minimum)</em>
+        <% end %>
+        <%= f.password_field :password, autocomplete: "new-password", placeholder: "Password", class: "w-full p-5 border-2 border-gray-200 bg-white text-teal-950 rounded-md text-large"  %>
+      </div>
+
+      <div class="mb-6">
+        <%= f.label :password_confirmation, class: "block text-green-950 mb-2 text-base font-medium"  %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", placeholder: "Password Confirmation", class: "w-full p-5 border-2 border-gray-200 bg-white text-teal-950 rounded-md text-large"  %>
+      </div>
+
+      <div>
+        <%= f.submit "Sign up", class: "w-full p-4 bg-[#02FEFF] text-teal-950 rounded-md cursor-pointer text-base font-bold uppercase"  %>
+      </div>
+    <% end %>
+
+    <div class="mt-2 text-center text-gray-400 text-sm font-medium">
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="flex w-full h-full align-center justify-center items-center relative p-5 bg-gray-700 overflow-hidden">
+  <div class="absolute bg-[#02FEFF] w-[300px] h-[300px] rotate-45 top-[-150px] left-[-150px]"></div>
+  <div class="absolute bg-[#02FEFF] w-[400px] h-[400px] rounded-full bottom-[-200px] right-[-200px]"></div>
+  
+  <div class="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-md z-10 max-h-[550px]">
+    <h2 class="mb-6 text-teal-950 text-4xl font-bold text-center uppercase">Login</h2>
+
+    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+      <div class="mb-6">
+        <%= f.label :email, "Email", class: "block text-green-950 mb-2 text-base font-medium" %>
+        <%= f.email_field :email, autofocus: true, autocomplete: "email", placeholder: "Email", class: "w-full p-5 border-2 border-gray-200 bg-white text-teal-950 rounded-md text-large" %>
+      </div>
+
+      <div class="mb-2">
+        <%= f.label :password, class: "block text-green-950 mb-2 text-base font-medium"  %>
+        <%= f.password_field :password, autocomplete: "current-password", placeholder: "Password", class: "w-full p-5 border-2 border-gray-200 bg-white text-teal-950 rounded-md text-large"  %>
+      </div>
+
+      <% if devise_mapping.rememberable? %>
+        <div class="flex align-center gap-2 mb-6 text-teal-950 text-sm">
+          <%= f.check_box :remember_me %>
+          <%= f.label :remember_me %>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.submit "Log In", class: "w-full p-4 bg-[#02FEFF] text-teal-950 rounded-md cursor-pointer text-base font-bold uppercase" %>
+      </div>
+    <% end %>
+
+    <div class="mt-4 text-center text-gray-400 text-sm font-medium">
+      <%= render "devise/shared/links" %>
+    </div>
+  </div>
+</div>
