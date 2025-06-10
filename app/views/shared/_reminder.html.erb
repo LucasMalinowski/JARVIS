@@ -1,0 +1,16 @@
+<li class="flex flex-col w-full bg-white rounded-lg shadow p-2 text-center" data-controller="collapse">
+  <span class="flex text-sm font-medium items-center text-gray-700 gap-2 cursor-pointer"
+        data-action="click->collapse#toggle">
+    <% if reminder.urgent %>
+      <i class="fa-solid fa-seal-exclamation text-red-500 mt-0.5"></i>
+    <% end %>
+    <%= reminder.title %>
+    <i class="fa-solid fa-caret-down" data-collapse-target="button"></i>
+  </span>
+
+  <% if reminder.description %>
+    <span class="text-xs text-gray-500 hidden" data-collapse-target="content">
+      <%= reminder.description %>
+    </span>
+  <% end %>
+</li>

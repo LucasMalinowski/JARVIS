@@ -47,7 +47,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_08_192102) do
     t.text "description"
     t.boolean "urgent", default: false
     t.boolean "completed", default: false
-    t.datetime "reminder_time", null: false
+    t.datetime "reminder_time"
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

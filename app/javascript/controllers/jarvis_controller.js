@@ -1,6 +1,7 @@
 import {Controller} from "@hotwired/stimulus";
 import {FetchRequest} from "@rails/request.js";
 import { handleGetWeather } from "services/get_weather"
+import { handleCreateReminder, handleGetReminders } from "services/handle_reminder";
 
 export default class extends Controller {
   static targets = [
@@ -20,6 +21,7 @@ export default class extends Controller {
     this.audioTrack         = null;
 
     handleGetWeather.call(this, {forecast: "current"}, false);
+    handleGetReminders.call(this, false);
 
     // Detect mobile vs desktop
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
