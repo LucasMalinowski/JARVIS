@@ -20,8 +20,7 @@ export default class extends Controller {
     // Track will hold the single audio track once granted
     this.audioTrack         = null;
 
-    handleGetWeather.call(this, {forecast: "current"}, false);
-    handleGetReminders.call(this, false);
+    this.initialCalls()
 
     // Detect mobile vs desktop
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -46,6 +45,14 @@ export default class extends Controller {
         console.warn("Permissão de microfone negada no desktop:", err);
       }
     }
+  }
+
+  async initialCalls() {
+    // kick off the delayed work, but don’t await it
+    setTimeout(() => {
+      handleGetWeather.call(this, { forecast: "current" }, false);
+      handleGetReminders.call(this, false);
+    }, 2000);
   }
 
   // request or revoke mic permission
@@ -91,14 +98,10 @@ export default class extends Controller {
       }
       const data = await response.json;
       this.ephemeralKey = data?.realtime_session?.client_secret?.value;
-      console.log("Chave efêmera:", this.ephemeralKey);
 
       // Cria a conexão RTCPeerConnection e a data channel
       this.pc = new RTCPeerConnection();
-      this.pc.oniceconnectionstatechange = () => console.log("Estado ICE:", this.pc.iceConnectionState);
-      this.pc.onconnectionstatechange = () => console.log("Estado PeerConnection:", this.pc.connectionState);
       this.pc.ontrack = (event) => {
-        console.log("Recebido track remoto:", event);
         if (event.streams && event.streams[0]) {
           this.remoteAudioStream = event.streams[0];
           if (this.hasAudioTarget) {
@@ -117,7 +120,6 @@ export default class extends Controller {
         const dcTimeout = setTimeout(() => reject(new Error("Timeout ao abrir dataChannel")), 15000);
         this.dataChannel.onopen = () => {
           clearTimeout(dcTimeout);
-          console.log("Data channel aberto.");
           resolve();
         };
       });
@@ -129,7 +131,6 @@ export default class extends Controller {
 
       // Cria a SDP offer
       const offer = await this.pc.createOffer();
-      console.log("SDP local:", offer.sdp);
       await this.pc.setLocalDescription(offer);
 
       // Envia a offer para a sessão realtime da OpenAI
@@ -144,7 +145,6 @@ export default class extends Controller {
         }
       });
       const remoteSdp = await sdpResponse.text();
-      console.log("SDP remoto:", remoteSdp);
       await this.pc.setRemoteDescription({ type: "answer", sdp: remoteSdp });
 
       // Aguarda a data channel abrir
@@ -188,7 +188,6 @@ export default class extends Controller {
       if (msg.type === "response.output_item.done") {
         this.isAiTalkingValue = true;
         const text = msg.item?.content?.[0]?.transcript || "";
-        console.log("Recebido da IA:", text);
         this.transcriptTarget.textContent = "Jarvis: " + text;
         const transcriptCtrl = this.application.getControllerForElementAndIdentifier(
           this.element,
@@ -200,10 +199,8 @@ export default class extends Controller {
       }
 
       if (msg.type === "response.function_call_arguments.done") {
-        console.log(msg)
         const name = msg.name;
         const rawArgs = msg.arguments || "";
-        console.log("Done message received. Function name:", name, "Raw args:", rawArgs);
 
         // If raw arguments are empty, bail
         if (!rawArgs.trim()) return;
@@ -221,8 +218,10 @@ export default class extends Controller {
           handleCreateReminder.call(this,parsed);
         } else if (name === "get_weather") {
           handleGetWeather.call(this, parsed);
+        } else if (name === "get_reminders") {
+          handleGetReminders.call(this);
         } else {
-          console.warn("Unknown function call:", name);
+          console.error("Unknown function call:", name);
         }
       }
 

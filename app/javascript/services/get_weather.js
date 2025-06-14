@@ -3,8 +3,6 @@
  * @this {import("@hotwired/stimulus").Controller}  bound to your Jarvis controller
  */
 export async function handleGetWeather(opts, shouldSpeak = true) {
-  this.transcriptTarget.textContent = `Jarvis: Buscando tempo para Cascavel...`;
-
   try {
     const resp = await fetch(
       `/api/v1/weathers?forecast=${encodeURIComponent(opts.forecast)}`,
@@ -37,7 +35,7 @@ export async function handleGetWeather(opts, shouldSpeak = true) {
         response: {
           modalities: ["audio", "text"],
           instructions:
-            "Responda com o tempo atual e adicione um emoji correspondente à condição do dia *SEM FALTA*: " +
+            "Responda com o a previsão do tempo abaixo: " +
             response_instruction
         }
       };

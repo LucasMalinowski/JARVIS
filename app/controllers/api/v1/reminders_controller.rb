@@ -5,7 +5,7 @@ module Api
       skip_before_action :verify_authenticity_token
 
       def index
-        reminders = Reminder.all.where(user_id: current_user.id)
+        reminders = Reminder.all.where(user_id: current_user.id).incomplete
 
         begin
           broadcast_reminder_update(reminders)

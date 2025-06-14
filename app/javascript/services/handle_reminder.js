@@ -41,8 +41,6 @@ export async function handleCreateReminder(opts, shouldSpeak = true) {
 }
 
 export async function handleGetReminders(shouldSpeak = true) {
-  this.transcriptTarget.textContent = `Jarvis: Verificando lembretes...`;
-
   try {
     const resp = await fetch(
       `/api/v1/reminders`,
@@ -54,6 +52,10 @@ export async function handleGetReminders(shouldSpeak = true) {
 
     console.log("Reminder data received from Rails:", reminders);
 
+    let response_instruction =
+      `${reminders.length} Lembretes encontrados: ` +
+      reminders.map(r => `${r.title} - ${r.description} - ${r.urgent ? "Urgente" : ""}`).join(", ");
+
     if (shouldSpeak){
       const followUp = {
         type: "response.create",
@@ -61,7 +63,7 @@ export async function handleGetReminders(shouldSpeak = true) {
           modalities: ["audio", "text"],
           instructions:
             "Responda com as informações dos lembretes encontrados " +
-            reminders
+            response_instruction
         }
       };
       this.dataChannel.send(JSON.stringify(followUp));

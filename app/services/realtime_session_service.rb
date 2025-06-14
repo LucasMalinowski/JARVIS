@@ -35,7 +35,7 @@ class RealtimeSessionService
       output_audio_format: "pcm16",
       turn_detection: turn_detection_config,
       max_response_output_tokens: 500,
-      tools: [ get_weather_function, create_reminder_function ]
+      tools: [ get_weather_function, create_reminder_function, get_reminders_function ]
     }
   end
 
@@ -77,6 +77,7 @@ class RealtimeSessionService
         **Tools Available:**
         - **get_weather:** Provides current weather information, including temperature, conditions, and rain chances.
         - **create_reminder:** Allows the user to set reminders for specific tasks or events.
+        - **get_reminders:** Retrieves the user's reminders, which can be used to check or manage tasks.
 
         **Example Commands:**
         - "What’s the weather like today?" -> Call the `get_weather` function with the forecast set to "current."
@@ -119,6 +120,20 @@ class RealtimeSessionService
         },
         "additionalProperties": false,
         "required": %w[reminder_text reminder_time]
+      }
+    }
+  end
+
+  def get_reminders_function
+    {
+      "name": "get_reminders",
+      "description": "Get the user's reminders.",
+      "type": "function",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false,
+        "required": []
       }
     }
   end
