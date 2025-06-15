@@ -62,7 +62,7 @@ export async function handleGetReminders(shouldSpeak = true) {
         response: {
           modalities: ["audio", "text"],
           instructions:
-            "Responda com as informações dos lembretes encontrados " +
+            "Parafraseie com as informações dos lembretes encontrados " +
             response_instruction
         }
       };
